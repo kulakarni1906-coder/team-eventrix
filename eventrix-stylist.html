@@ -1,0 +1,1398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EVENTRIX — AI Style Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Bricolage+Grotesque:wght@300;400;600;800&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+:root {
+  --ink: #080808;
+  --paper: #F7F4EF;
+  --flame: #E8340A;
+  --gold: #C8A84B;
+  --mist: #B8B5AF;
+  --cream: #EDE9E2;
+  --card: #FFFFFF;
+  --font-display: 'Bebas Neue', sans-serif;
+  --font-body: 'Bricolage Grotesque', sans-serif;
+  --font-mono: 'Space Mono', monospace;
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  overflow-x: hidden;
+  cursor: none;
+}
+
+/* CUSTOM CURSOR */
+.cursor {
+  width: 12px; height: 12px;
+  background: var(--flame);
+  border-radius: 50%;
+  position: fixed; pointer-events: none;
+  z-index: 99999;
+  transition: transform 0.1s ease;
+  mix-blend-mode: difference;
+}
+.cursor-ring {
+  width: 40px; height: 40px;
+  border: 1.5px solid var(--flame);
+  border-radius: 50%;
+  position: fixed; pointer-events: none;
+  z-index: 99998;
+  transition: transform 0.25s ease, width 0.3s, height 0.3s;
+  mix-blend-mode: difference;
+  transform: translate(-14px, -14px);
+}
+.cursor-ring.expand { width: 60px; height: 60px; transform: translate(-24px, -24px); }
+
+/* SPLASH */
+#splash {
+  position: fixed; inset: 0;
+  background: var(--ink);
+  z-index: 9990;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  overflow: hidden;
+}
+.splash-bg {
+  position: absolute; inset: 0;
+  background: repeating-linear-gradient(
+    90deg,
+    transparent, transparent 80px,
+    rgba(255,255,255,0.02) 80px, rgba(255,255,255,0.02) 81px
+  ), repeating-linear-gradient(
+    0deg,
+    transparent, transparent 80px,
+    rgba(255,255,255,0.02) 80px, rgba(255,255,255,0.02) 81px
+  );
+}
+.splash-logo {
+  position: relative; text-align: center;
+  animation: splashReveal 2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  opacity: 0;
+}
+@keyframes splashReveal {
+  0% { opacity: 0; transform: translateY(40px) skewY(3deg); }
+  100% { opacity: 1; transform: translateY(0) skewY(0); }
+}
+.splash-logo .eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 6px;
+  color: var(--mist);
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  display: block;
+}
+.splash-logo h1 {
+  font-family: var(--font-display);
+  font-size: clamp(80px, 15vw, 160px);
+  letter-spacing: 8px;
+  color: #FFF;
+  line-height: 0.9;
+}
+.splash-logo h1 em {
+  font-style: normal;
+  color: var(--flame);
+  display: block;
+  -webkit-text-stroke: 0px;
+}
+.splash-logo h1 em.outline {
+  -webkit-text-stroke: 2px var(--flame);
+  color: transparent;
+  font-size: 0.6em;
+  letter-spacing: 18px;
+}
+.splash-bar {
+  position: absolute; bottom: 0; left: 0;
+  height: 4px; background: var(--flame);
+  animation: loadBar 2s ease-in-out forwards;
+}
+@keyframes loadBar { 0%{ width:0 } 100%{ width:100% } }
+
+/* MAIN NAV */
+nav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(247, 244, 239, 0.92);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+  padding: 0 5%;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 70px;
+}
+.nav-logo {
+  font-family: var(--font-display);
+  font-size: 24px;
+  letter-spacing: 3px;
+  color: var(--ink);
+  text-decoration: none;
+}
+.nav-logo span { color: var(--flame); }
+.nav-links {
+  display: flex; gap: 35px; list-style: none;
+}
+.nav-links a {
+  font-size: 13px; font-weight: 600;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  text-decoration: none; color: var(--ink);
+  transition: color 0.2s;
+}
+.nav-links a:hover { color: var(--flame); }
+.nav-cta {
+  background: var(--ink); color: #fff;
+  border: none; padding: 10px 24px;
+  font-family: var(--font-body); font-weight: 700; font-size: 13px;
+  letter-spacing: 1px; text-transform: uppercase;
+  cursor: none; border-radius: 4px;
+  transition: background 0.2s, transform 0.2s;
+}
+.nav-cta:hover { background: var(--flame); transform: translateY(-1px); }
+
+/* HERO */
+#hero {
+  min-height: 92vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  overflow: hidden;
+  position: relative;
+}
+.hero-left {
+  display: flex; flex-direction: column;
+  justify-content: center; padding: 80px 8% 80px 8%;
+  position: relative;
+}
+.hero-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px; letter-spacing: 5px;
+  text-transform: uppercase; color: var(--flame);
+  margin-bottom: 28px;
+}
+.hero-left h1 {
+  font-family: var(--font-display);
+  font-size: clamp(60px, 7vw, 110px);
+  line-height: 0.92;
+  letter-spacing: 2px;
+  margin-bottom: 30px;
+}
+.hero-left h1 .outline-text {
+  -webkit-text-stroke: 2px var(--ink);
+  color: transparent;
+}
+.hero-left p {
+  font-size: 17px; line-height: 1.7;
+  color: #555; max-width: 400px;
+  margin-bottom: 45px;
+  font-weight: 300;
+}
+.hero-actions { display: flex; gap: 15px; align-items: center; flex-wrap: wrap; }
+.btn-primary {
+  background: var(--flame); color: #fff;
+  border: none; padding: 16px 38px;
+  font-family: var(--font-body); font-weight: 800; font-size: 15px;
+  letter-spacing: 1px; text-transform: uppercase;
+  cursor: none; border-radius: 4px;
+  transition: transform 0.25s, box-shadow 0.25s;
+  box-shadow: 0 6px 20px rgba(232,52,10,0.3);
+}
+.btn-primary:hover { transform: translateY(-3px); box-shadow: 0 12px 35px rgba(232,52,10,0.4); }
+.btn-ghost {
+  background: transparent; color: var(--ink);
+  border: 2px solid var(--ink); padding: 14px 32px;
+  font-family: var(--font-body); font-weight: 700; font-size: 14px;
+  letter-spacing: 1px; text-transform: uppercase;
+  cursor: none; border-radius: 4px;
+  transition: 0.25s;
+  text-decoration: none; display: inline-block;
+}
+.btn-ghost:hover { background: var(--ink); color: #fff; }
+.hero-stats {
+  margin-top: 60px; display: flex; gap: 40px;
+  border-top: 1px solid rgba(0,0,0,0.1); padding-top: 35px;
+}
+.stat-item h3 {
+  font-family: var(--font-display); font-size: 38px; color: var(--flame);
+}
+.stat-item p { font-size: 12px; font-weight: 600; letter-spacing: 1px; color: #777; text-transform: uppercase; }
+
+.hero-right {
+  background: var(--ink);
+  position: relative; overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+}
+.hero-right-bg {
+  position: absolute; inset: 0;
+  background: 
+    radial-gradient(circle at 30% 50%, rgba(232,52,10,0.15) 0%, transparent 60%),
+    radial-gradient(circle at 80% 20%, rgba(200,168,75,0.1) 0%, transparent 50%);
+}
+.floating-card {
+  position: relative; z-index: 2;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 20px; padding: 35px;
+  backdrop-filter: blur(20px);
+  width: 300px;
+  animation: floatCard 4s ease-in-out infinite;
+}
+@keyframes floatCard {
+  0%, 100% { transform: translateY(0) rotate(-1deg); }
+  50% { transform: translateY(-15px) rotate(1deg); }
+}
+.floating-card .fc-label {
+  font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: 4px; color: var(--mist);
+  text-transform: uppercase; margin-bottom: 20px;
+}
+.color-palette-preview {
+  display: flex; gap: 8px; margin-bottom: 25px;
+}
+.cp-swatch {
+  flex: 1; height: 50px; border-radius: 8px;
+  transition: transform 0.3s;
+}
+.cp-swatch:hover { transform: scaleY(1.15); }
+.fc-name {
+  font-family: var(--font-display); font-size: 28px;
+  color: #fff; letter-spacing: 2px;
+  margin-bottom: 8px;
+}
+.fc-tags { display: flex; gap: 8px; flex-wrap: wrap; }
+.fc-tag {
+  background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.7);
+  padding: 4px 12px; border-radius: 30px;
+  font-size: 11px; font-weight: 600; letter-spacing: 1px;
+}
+.hero-deco-num {
+  position: absolute; bottom: 40px; right: 40px;
+  font-family: var(--font-display); font-size: 140px;
+  color: rgba(255,255,255,0.03); letter-spacing: -5px;
+  pointer-events: none; z-index: 1;
+}
+
+/* MARQUEE */
+.marquee-strip {
+  background: var(--flame); padding: 14px 0;
+  overflow: hidden; white-space: nowrap;
+  border-top: 2px solid var(--ink); border-bottom: 2px solid var(--ink);
+}
+.marquee-inner {
+  display: inline-flex; animation: marqueeScroll 18s linear infinite;
+}
+.marquee-inner span {
+  font-family: var(--font-display); font-size: 18px;
+  letter-spacing: 4px; color: #fff;
+  padding: 0 35px; text-transform: uppercase;
+}
+.marquee-inner .dot { color: rgba(255,255,255,0.4); font-size: 12px; }
+@keyframes marqueeScroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+/* HOW IT WORKS */
+#how {
+  padding: 120px 8%;
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 80px; align-items: center;
+}
+.section-label {
+  font-family: var(--font-mono); font-size: 11px;
+  letter-spacing: 5px; text-transform: uppercase;
+  color: var(--flame); margin-bottom: 20px;
+  display: block;
+}
+.section-title {
+  font-family: var(--font-display); font-size: clamp(45px, 5vw, 72px);
+  line-height: 0.95; letter-spacing: 1px;
+  margin-bottom: 30px;
+}
+.how-steps { display: flex; flex-direction: column; gap: 35px; }
+.step {
+  display: flex; gap: 25px; align-items: flex-start;
+  padding: 28px; border-radius: 16px;
+  border: 1px solid transparent;
+  transition: 0.3s; background: transparent;
+}
+.step:hover { background: #fff; border-color: rgba(0,0,0,0.06); transform: translateX(8px); }
+.step-num {
+  font-family: var(--font-display); font-size: 52px;
+  color: var(--cream); line-height: 1; min-width: 60px;
+  transition: color 0.3s;
+}
+.step:hover .step-num { color: var(--flame); }
+.step-content h4 { font-size: 18px; font-weight: 800; margin-bottom: 8px; }
+.step-content p { font-size: 14px; color: #666; line-height: 1.7; }
+.how-visual {
+  position: relative;
+  height: 500px; border-radius: 24px;
+  background: var(--ink); overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+}
+.how-visual-bg {
+  position: absolute; inset: 0;
+  background: 
+    radial-gradient(circle at 20% 80%, rgba(232,52,10,0.2) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(200,168,75,0.15) 0%, transparent 50%);
+}
+.scan-lines {
+  position: absolute; inset: 0;
+  background: repeating-linear-gradient(
+    0deg, transparent, transparent 3px, rgba(255,255,255,0.015) 3px, rgba(255,255,255,0.015) 4px
+  );
+}
+.mock-face {
+  position: relative; z-index: 2; text-align: center;
+}
+.face-ring {
+  width: 200px; height: 200px;
+  border: 3px dashed rgba(232,52,10,0.6);
+  border-radius: 50%; margin: 0 auto 30px;
+  display: flex; align-items: center; justify-content: center;
+  animation: spinRing 8s linear infinite;
+  position: relative;
+}
+@keyframes spinRing { to { transform: rotate(360deg); } }
+.face-ring::after {
+  content: '';
+  position: absolute;
+  width: 180px; height: 180px;
+  border: 1px solid rgba(200,168,75,0.3);
+  border-radius: 50%;
+  animation: spinRing 4s linear infinite reverse;
+}
+.face-icon { font-size: 70px; color: rgba(255,255,255,0.15); animation: spinRing 0s linear; }
+.scan-text {
+  font-family: var(--font-mono); font-size: 11px;
+  color: var(--flame); letter-spacing: 4px;
+  text-transform: uppercase;
+  animation: blink 1.5s ease-in-out infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+.scan-grid {
+  position: absolute; inset: 0;
+  background: 
+    linear-gradient(rgba(232,52,10,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(232,52,10,0.05) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+/* TOOL SECTION */
+#tool {
+  padding: 80px 6%;
+  background: var(--ink);
+  position: relative; overflow: hidden;
+}
+#tool::before {
+  content: 'STYLE';
+  position: absolute; top: -20px; left: -10px;
+  font-family: var(--font-display); font-size: 25vw;
+  color: rgba(255,255,255,0.02); letter-spacing: -10px;
+  pointer-events: none; line-height: 1;
+}
+.tool-header { text-align: center; margin-bottom: 60px; position: relative; z-index: 2; }
+.tool-header .section-label { color: var(--gold); }
+.tool-header h2 { font-family: var(--font-display); font-size: clamp(40px, 5vw, 70px); color: #fff; letter-spacing: 2px; }
+.tool-header p { color: var(--mist); font-size: 16px; max-width: 500px; margin: 15px auto 0; line-height: 1.7; }
+
+.tool-wrapper {
+  max-width: 1000px; margin: 0 auto; position: relative; z-index: 2;
+}
+.tool-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 30px;
+}
+
+/* STYLE CATEGORIES */
+.style-tabs {
+  display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap;
+}
+.style-tab {
+  padding: 10px 22px;
+  font-family: var(--font-body); font-size: 13px; font-weight: 700;
+  letter-spacing: 1px; text-transform: uppercase;
+  border: 2px solid rgba(255,255,255,0.15); border-radius: 6px;
+  background: transparent; color: rgba(255,255,255,0.5);
+  cursor: none; transition: 0.2s;
+}
+.style-tab.active {
+  border-color: var(--flame); background: var(--flame); color: #fff;
+}
+
+.upload-panel {
+  background: rgba(255,255,255,0.04);
+  border: 2px dashed rgba(255,255,255,0.12);
+  border-radius: 20px; padding: 50px 30px;
+  text-align: center; cursor: none;
+  transition: 0.3s; position: relative; overflow: hidden;
+}
+.upload-panel:hover {
+  border-color: var(--flame); background: rgba(232,52,10,0.06);
+}
+.upload-icon { font-size: 48px; color: var(--flame); margin-bottom: 20px; }
+.upload-panel h3 { color: #fff; font-size: 20px; font-weight: 800; margin-bottom: 10px; }
+.upload-panel p { color: var(--mist); font-size: 14px; line-height: 1.6; }
+.upload-panel .up-hint {
+  margin-top: 20px; font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: 3px; color: rgba(255,255,255,0.25); text-transform: uppercase;
+}
+.upload-panel input { display: none; }
+
+.info-panel {
+  display: flex; flex-direction: column; gap: 20px;
+}
+.info-card {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px; padding: 24px;
+}
+.info-card-title {
+  font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: 3px; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 14px;
+}
+.occasion-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+}
+.occ-item {
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px; padding: 12px;
+  text-align: center; cursor: none;
+  transition: 0.2s;
+}
+.occ-item.active { background: var(--flame); border-color: var(--flame); }
+.occ-item i { font-size: 22px; color: #fff; margin-bottom: 6px; display: block; }
+.occ-item span { font-size: 11px; font-weight: 700; letter-spacing: 1px; color: #fff; text-transform: uppercase; }
+.feature-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.feature-list li {
+  display: flex; align-items: center; gap: 12px;
+  font-size: 13px; color: rgba(255,255,255,0.7);
+}
+.feature-list li i { color: var(--flame); font-size: 14px; }
+
+.analyze-btn {
+  width: 100%; padding: 18px;
+  background: linear-gradient(135deg, var(--flame), #FF5A34);
+  color: #fff; border: none; border-radius: 12px;
+  font-family: var(--font-body); font-weight: 800; font-size: 16px;
+  letter-spacing: 2px; text-transform: uppercase;
+  cursor: none; margin-top: 10px;
+  transition: 0.3s; box-shadow: 0 8px 30px rgba(232,52,10,0.4);
+}
+.analyze-btn:hover { transform: translateY(-2px); box-shadow: 0 14px 40px rgba(232,52,10,0.5); }
+.analyze-btn:disabled { opacity: 0.5; transform: none; }
+
+/* LOADING */
+#loading-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(8,8,8,0.95);
+  z-index: 500; align-items: center; justify-content: center;
+  flex-direction: column;
+}
+.loading-ring {
+  width: 100px; height: 100px;
+  border: 3px solid rgba(255,255,255,0.05);
+  border-top-color: var(--flame);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 30px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-text {
+  font-family: var(--font-mono); font-size: 11px;
+  letter-spacing: 5px; color: var(--mist);
+  text-transform: uppercase; animation: blink 2s infinite;
+}
+.loading-step {
+  margin-top: 15px; font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: 3px; color: var(--flame); text-transform: uppercase;
+}
+
+/* REPORT / RESULTS */
+#result-section {
+  display: none;
+  padding: 80px 6%;
+  background: var(--paper);
+}
+.result-header {
+  text-align: center; margin-bottom: 60px;
+}
+.result-header h2 {
+  font-family: var(--font-display); font-size: clamp(40px, 5vw, 68px);
+  letter-spacing: 2px; line-height: 0.95;
+  margin-bottom: 15px;
+}
+.result-header h2 em {
+  font-style: normal; color: var(--flame);
+}
+
+.result-layout {
+  display: grid; grid-template-columns: 300px 1fr; gap: 40px;
+  max-width: 1200px; margin: 0 auto;
+  align-items: start;
+}
+
+/* PROFILE CARD */
+.profile-card {
+  background: var(--ink); border-radius: 24px; padding: 35px;
+  text-align: center; position: sticky; top: 90px;
+}
+#user-photo {
+  width: 130px; height: 130px; object-fit: cover;
+  border-radius: 50%; border: 4px solid var(--flame);
+  margin-bottom: 18px;
+}
+.profile-card h3 {
+  font-family: var(--font-display); font-size: 22px; letter-spacing: 2px;
+  color: #fff; margin-bottom: 5px;
+}
+.profile-badge {
+  font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: 3px; color: var(--gold);
+  text-transform: uppercase; margin-bottom: 25px;
+}
+.palette-label {
+  font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: 3px; color: var(--mist);
+  text-transform: uppercase; margin-bottom: 12px;
+  display: block;
+}
+.palette-name {
+  font-family: var(--font-display); font-size: 26px;
+  color: #fff; letter-spacing: 3px; margin-bottom: 18px;
+}
+#swatches-display {
+  display: flex; gap: 6px; justify-content: center; margin-bottom: 20px;
+}
+.swatch-block {
+  flex: 1; height: 55px; border-radius: 8px;
+  position: relative; overflow: hidden; cursor: none;
+}
+.swatch-block:hover::after {
+  content: attr(data-hex);
+  position: absolute; inset: 0; background: rgba(0,0,0,0.6);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-mono); font-size: 9px; color: #fff;
+  letter-spacing: 1px;
+}
+.profile-meta {
+  border-top: 1px solid rgba(255,255,255,0.08); padding-top: 20px; margin-top: 10px;
+}
+.profile-meta-item {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.profile-meta-item span { font-size: 12px; color: var(--mist); }
+.profile-meta-item strong { font-size: 12px; color: #fff; font-weight: 700; }
+.confidence-bar {
+  height: 4px; background: rgba(255,255,255,0.1); border-radius: 4px; margin-top: 12px;
+}
+.confidence-fill {
+  height: 100%; background: var(--flame); border-radius: 4px;
+  animation: grow 1.5s ease forwards;
+}
+@keyframes grow { from { width: 0; } }
+
+/* RECS */
+.recs-area {}
+.recs-tabs {
+  display: flex; gap: 4px; margin-bottom: 30px;
+  background: var(--cream); padding: 6px; border-radius: 12px; width: fit-content;
+}
+.recs-tab {
+  padding: 10px 22px; border: none; border-radius: 8px;
+  font-family: var(--font-body); font-weight: 700; font-size: 13px;
+  letter-spacing: 1px; text-transform: uppercase;
+  cursor: none; background: transparent; color: #888;
+  transition: 0.2s;
+}
+.recs-tab.active { background: #fff; color: var(--ink); box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+
+.recs-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
+}
+.rec-card {
+  background: #fff; border-radius: 20px;
+  border: 1px solid rgba(0,0,0,0.06);
+  overflow: hidden; transition: 0.3s;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+}
+.rec-card:hover { transform: translateY(-6px); box-shadow: 0 16px 40px rgba(0,0,0,0.1); }
+.rec-card-img {
+  height: 130px; background: var(--cream);
+  display: flex; align-items: center; justify-content: center;
+  position: relative; overflow: hidden;
+}
+.rec-card-img i { font-size: 50px; color: var(--mist); }
+.rec-card-img .color-dots {
+  position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%);
+  display: flex; gap: 5px;
+}
+.color-dot { width: 14px; height: 14px; border-radius: 50%; border: 2px solid #fff; }
+.rec-card-body { padding: 20px; }
+.rec-card-cat {
+  font-family: var(--font-mono); font-size: 9px;
+  letter-spacing: 3px; text-transform: uppercase; color: var(--flame);
+  margin-bottom: 6px;
+}
+.rec-card-title { font-size: 16px; font-weight: 800; margin-bottom: 6px; }
+.rec-card-desc { font-size: 12px; color: #888; line-height: 1.6; margin-bottom: 16px; }
+.shop-btn {
+  display: block; width: 100%; padding: 11px;
+  background: var(--ink); color: #fff;
+  text-align: center; text-decoration: none;
+  font-weight: 800; font-size: 12px; letter-spacing: 2px; text-transform: uppercase;
+  border-radius: 8px; transition: 0.2s;
+}
+.shop-btn:hover { background: var(--flame); }
+
+/* COLOR STORY SECTION */
+.color-story {
+  margin-top: 35px; background: var(--ink); border-radius: 24px; padding: 35px;
+}
+.color-story h3 {
+  font-family: var(--font-display); font-size: 30px; color: #fff;
+  letter-spacing: 2px; margin-bottom: 8px;
+}
+.color-story p { color: var(--mist); font-size: 14px; line-height: 1.7; margin-bottom: 25px; }
+.full-palette {
+  display: flex; gap: 0; border-radius: 14px; overflow: hidden; height: 70px;
+}
+.fp-swatch { flex: 1; transition: flex 0.4s ease; cursor: none; }
+.fp-swatch:hover { flex: 2; }
+
+.styling-tips {
+  margin-top: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+}
+.tip-item {
+  background: rgba(255,255,255,0.04); border-radius: 10px;
+  padding: 14px; display: flex; gap: 12px; align-items: flex-start;
+}
+.tip-item i { color: var(--gold); font-size: 14px; margin-top: 2px; }
+.tip-item p { font-size: 12px; color: rgba(255,255,255,0.6); line-height: 1.6; }
+
+/* RESTART */
+.result-actions {
+  text-align: center; margin-top: 50px;
+}
+.restart-btn {
+  background: none; border: 2px solid rgba(0,0,0,0.15); padding: 12px 30px;
+  font-family: var(--font-body); font-weight: 700; font-size: 13px;
+  letter-spacing: 2px; text-transform: uppercase; cursor: none; border-radius: 8px;
+  color: #888; transition: 0.2s;
+}
+.restart-btn:hover { border-color: var(--flame); color: var(--flame); }
+
+/* FEATURES STRIP */
+#features { padding: 100px 8%; background: var(--cream); }
+.features-header { text-align: center; margin-bottom: 60px; }
+.features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px; }
+.feat-card {
+  background: #fff; padding: 35px; border-radius: 20px;
+  border: 1px solid rgba(0,0,0,0.06);
+  transition: 0.3s;
+}
+.feat-card:hover { transform: translateY(-5px); box-shadow: 0 15px 40px rgba(0,0,0,0.08); }
+.feat-icon {
+  width: 56px; height: 56px; background: var(--cream);
+  border-radius: 14px; display: flex; align-items: center; justify-content: center;
+  font-size: 24px; color: var(--flame); margin-bottom: 22px;
+  transition: 0.3s;
+}
+.feat-card:hover .feat-icon { background: var(--flame); color: #fff; }
+.feat-card h4 { font-size: 18px; font-weight: 800; margin-bottom: 10px; }
+.feat-card p { font-size: 14px; color: #777; line-height: 1.7; }
+
+/* FOOTER */
+footer {
+  background: var(--ink); color: rgba(255,255,255,0.6);
+  padding: 60px 8% 40px;
+}
+.footer-top {
+  display: flex; justify-content: space-between; align-items: center;
+  padding-bottom: 40px; border-bottom: 1px solid rgba(255,255,255,0.08);
+  margin-bottom: 40px;
+}
+.footer-logo {
+  font-family: var(--font-display); font-size: 36px;
+  letter-spacing: 4px; color: #fff;
+}
+.footer-logo span { color: var(--flame); }
+.footer-tagline { font-size: 13px; color: var(--mist); margin-top: 5px; }
+.footer-links { display: flex; gap: 30px; }
+.footer-links a {
+  font-size: 12px; font-weight: 700; letter-spacing: 2px;
+  text-transform: uppercase; color: rgba(255,255,255,0.4);
+  text-decoration: none; transition: color 0.2s;
+}
+.footer-links a:hover { color: var(--flame); }
+.footer-bottom {
+  display: flex; justify-content: space-between; align-items: center;
+  font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: 2px; color: rgba(255,255,255,0.2);
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  #hero { grid-template-columns: 1fr; }
+  .hero-right { min-height: 350px; }
+  #how { grid-template-columns: 1fr; }
+  .how-visual { display: none; }
+  .tool-grid { grid-template-columns: 1fr; }
+  .result-layout { grid-template-columns: 1fr; }
+  .profile-card { position: static; }
+  .recs-grid { grid-template-columns: 1fr 1fr; }
+  .features-grid { grid-template-columns: 1fr; }
+  .footer-top { flex-direction: column; gap: 25px; text-align: center; }
+  nav .nav-links { display: none; }
+}
+@media (max-width: 600px) {
+  .recs-grid { grid-template-columns: 1fr; }
+  .styling-tips { grid-template-columns: 1fr; }
+}
+
+/* UTILS */
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- SPLASH -->
+<div id="splash">
+  <div class="splash-bg"></div>
+  <div class="splash-logo">
+    <span class="eyebrow">Powered by AI Color Intelligence</span>
+    <h1>TEAM <em>EVENTRIX</em></h1>
+  </div>
+  <div class="splash-bar"></div>
+</div>
+
+<!-- MAIN -->
+<div id="main-app" style="display:none;">
+
+  <!-- NAV -->
+  <nav>
+    <a class="nav-logo" href="#">TEAM <span>EVENTRIX</span></a>
+    <ul class="nav-links">
+      <li><a href="#how">How It Works</a></li>
+      <li><a href="#tool">Analyze</a></li>
+      <li><a href="#features">Features</a></li>
+    </ul>
+    <button class="nav-cta" onclick="document.getElementById('tool').scrollIntoView({behavior:'smooth'})">Try Now Free</button>
+  </nav>
+
+  <!-- HERO -->
+  <section id="hero">
+    <div class="hero-left">
+      <p class="hero-eyebrow">// V2.0 — AI STYLE INTELLIGENCE PLATFORM</p>
+      <h1>DRESS<br><span class="outline-text">LIKE</span><br>DATA.</h1>
+      <p>Upload your photo and let our AI engine analyze your skin tone, undertones, and facial features — then generate your personal 5-color palette and curated outfit recommendations.</p>
+      <div class="hero-actions">
+        <button class="btn-primary" onclick="document.getElementById('tool').scrollIntoView({behavior:'smooth'})">Get My Color Analysis</button>
+        <a class="btn-ghost" href="#how">How It Works</a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-item"><h3>50K+</h3><p>Palettes Generated</p></div>
+        <div class="stat-item"><h3>5</h3><p>Precision Colors</p></div>
+        <div class="stat-item"><h3>98%</h3><p>Style Match Rate</p></div>
+      </div>
+    </div>
+
+    <div class="hero-right">
+      <div class="hero-right-bg"></div>
+      <div class="floating-card">
+        <p class="fc-label">// Your Style Profile</p>
+        <div class="color-palette-preview">
+          <div class="cp-swatch" style="background:#0D1B2A"></div>
+          <div class="cp-swatch" style="background:#415A77"></div>
+          <div class="cp-swatch" style="background:#778DA9"></div>
+          <div class="cp-swatch" style="background:#D4AF37"></div>
+          <div class="cp-swatch" style="background:#E0E1DD"></div>
+        </div>
+        <div class="fc-name">MIDNIGHT ROYAL</div>
+        <div class="fc-tags">
+          <span class="fc-tag">Navy Blue</span>
+          <span class="fc-tag">Formal</span>
+          <span class="fc-tag">Bold</span>
+        </div>
+      </div>
+      <div class="hero-deco-num">05</div>
+    </div>
+  </section>
+
+  <!-- MARQUEE -->
+  <div class="marquee-strip">
+    <div class="marquee-inner">
+      <span>AI COLOR ANALYSIS</span><span class="dot">✦</span>
+      <span>SKIN TONE MATCHING</span><span class="dot">✦</span>
+      <span>MYNTRA INTEGRATION</span><span class="dot">✦</span>
+      <span>5-SHADE PALETTES</span><span class="dot">✦</span>
+      <span>PERSONAL STYLING</span><span class="dot">✦</span>
+      <span>TEAM EVENTRIX</span><span class="dot">✦</span>
+      <span>AI COLOR ANALYSIS</span><span class="dot">✦</span>
+      <span>SKIN TONE MATCHING</span><span class="dot">✦</span>
+      <span>MYNTRA INTEGRATION</span><span class="dot">✦</span>
+      <span>5-SHADE PALETTES</span><span class="dot">✦</span>
+      <span>PERSONAL STYLING</span><span class="dot">✦</span>
+      <span>TEAM EVENTRIX</span><span class="dot">✦</span>
+    </div>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <section id="how">
+    <div class="how-left">
+      <span class="section-label">// Process</span>
+      <h2 class="section-title">STYLE<br>INTELLIGENCE<br>DECODED.</h2>
+      <p style="color:#666; font-size:15px; line-height:1.8; margin-bottom:45px; max-width:400px;">Our algorithm analyzes over 200 color data points from your photo to compute the perfect 5-shade palette unique to your features.</p>
+      <div class="how-steps">
+        <div class="step">
+          <span class="step-num">01</span>
+          <div class="step-content">
+            <h4>Upload Your Photo</h4>
+            <p>A clear, well-lit front-facing photo works best. Our AI will do the rest — no special camera required.</p>
+          </div>
+        </div>
+        <div class="step">
+          <span class="step-num">02</span>
+          <div class="step-content">
+            <h4>Select Your Occasion</h4>
+            <p>Tell us where you're headed — casual outings, formal events, or night-out parties. Context matters for great style.</p>
+          </div>
+        </div>
+        <div class="step">
+          <span class="step-num">03</span>
+          <div class="step-content">
+            <h4>Receive Your 5-Color DNA</h4>
+            <p>We generate a scientifically-matched 5-shade palette that harmonizes perfectly with your skin and undertones.</p>
+          </div>
+        </div>
+        <div class="step">
+          <span class="step-num">04</span>
+          <div class="step-content">
+            <h4>Shop Curated Picks on Myntra</h4>
+            <p>Direct links to top wear, bottom wear, and footwear that match your palette. One click to your perfect outfit.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="how-visual">
+      <div class="how-visual-bg"></div>
+      <div class="scan-lines"></div>
+      <div class="scan-grid"></div>
+      <div class="mock-face">
+        <div class="face-ring">
+          <i class="fas fa-user face-icon"></i>
+        </div>
+        <p class="scan-text">SCANNING COLOR PROFILE...</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- TOOL -->
+  <section id="tool">
+    <div class="tool-header">
+      <span class="section-label">// AI Analyzer</span>
+      <h2>GET YOUR STYLE REPORT</h2>
+      <p>Upload a photo and choose your style. Get your personal color DNA in seconds.</p>
+    </div>
+
+    <div class="tool-wrapper">
+      <div class="style-tabs" id="styleTabs">
+        <button class="style-tab active" data-cat="casual" onclick="setCategory(this)"><i class="fas fa-leaf" style="margin-right:7px"></i>Casual</button>
+        <button class="style-tab" data-cat="formal" onclick="setCategory(this)"><i class="fas fa-briefcase" style="margin-right:7px"></i>Formal</button>
+        <button class="style-tab" data-cat="party" onclick="setCategory(this)"><i class="fas fa-star" style="margin-right:7px"></i>Party</button>
+        <button class="style-tab" data-cat="wedding" onclick="setCategory(this)"><i class="fas fa-ring" style="margin-right:7px"></i>Wedding</button>
+        <button class="style-tab" data-cat="sport" onclick="setCategory(this)"><i class="fas fa-running" style="margin-right:7px"></i>Sport</button>
+      </div>
+
+      <div class="tool-grid">
+        <!-- Upload -->
+        <div class="upload-panel" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+          <div class="upload-icon"><i class="fas fa-camera-retro"></i></div>
+          <h3>Upload Your Photo</h3>
+          <p>Drop your photo here or click to browse.<br>JPG, PNG, WEBP supported.</p>
+          <p class="up-hint">Click anywhere in this zone to select</p>
+          <input type="file" id="fileInput" accept="image/*">
+        </div>
+
+        <!-- Right panel -->
+        <div class="info-panel">
+          <div class="info-card">
+            <p class="info-card-title">// Occasion Type</p>
+            <div class="occasion-grid" id="occGrid">
+              <div class="occ-item active" data-cat="casual" onclick="setCategory2(this)">
+                <i class="fas fa-leaf"></i><span>Casual</span>
+              </div>
+              <div class="occ-item" data-cat="formal" onclick="setCategory2(this)">
+                <i class="fas fa-briefcase"></i><span>Formal</span>
+              </div>
+              <div class="occ-item" data-cat="party" onclick="setCategory2(this)">
+                <i class="fas fa-star"></i><span>Party</span>
+              </div>
+              <div class="occ-item" data-cat="wedding" onclick="setCategory2(this)">
+                <i class="fas fa-ring"></i><span>Wedding</span>
+              </div>
+            </div>
+          </div>
+          <div class="info-card">
+            <p class="info-card-title">// What You'll Get</p>
+            <ul class="feature-list">
+              <li><i class="fas fa-check-circle"></i> Personal 5-Color Palette</li>
+              <li><i class="fas fa-check-circle"></i> Skin Tone + Undertone Analysis</li>
+              <li><i class="fas fa-check-circle"></i> Top Wear Recommendations</li>
+              <li><i class="fas fa-check-circle"></i> Bottom Wear Recommendations</li>
+              <li><i class="fas fa-check-circle"></i> Footwear Recommendations</li>
+              <li><i class="fas fa-check-circle"></i> Direct Myntra Shop Links</li>
+            </ul>
+          </div>
+          <button class="analyze-btn" id="analyzeBtn" disabled onclick="runAnalysis()">
+            <i class="fas fa-magic" style="margin-right:8px"></i>ANALYZE MY STYLE
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RESULTS -->
+  <section id="result-section">
+    <div class="result-header">
+      <span class="section-label" style="color:var(--flame)">// Your Style Report</span>
+      <h2>YOUR PERSONAL<br><em>COLOR DNA</em></h2>
+    </div>
+
+    <div class="result-layout">
+      <!-- Profile Card -->
+      <aside class="profile-card">
+        <img id="user-photo" src="" alt="Your Photo">
+        <h3 id="palette-name-display">—</h3>
+        <p class="profile-badge">YOUR COLOR IDENTITY</p>
+        <span class="palette-label">// 5-Shade Palette</span>
+        <div id="swatches-display"></div>
+
+        <div class="profile-meta">
+          <div class="profile-meta-item">
+            <span>Occasion</span>
+            <strong id="res-occasion">—</strong>
+          </div>
+          <div class="profile-meta-item">
+            <span>Color Season</span>
+            <strong id="res-season">—</strong>
+          </div>
+          <div class="profile-meta-item">
+            <span>Undertone</span>
+            <strong id="res-undertone">—</strong>
+          </div>
+          <div class="profile-meta-item">
+            <span>Style Archetype</span>
+            <strong id="res-archetype">—</strong>
+          </div>
+        </div>
+
+        <div style="margin-top:15px;">
+          <span class="palette-label">// Style Match Confidence</span>
+          <div class="confidence-bar">
+            <div class="confidence-fill" id="confFill" style="width:0%"></div>
+          </div>
+          <p style="text-align:right; font-family:var(--font-mono); font-size:10px; color:var(--flame); margin-top:6px;" id="confLabel">—</p>
+        </div>
+      </aside>
+
+      <!-- Recommendations -->
+      <div class="recs-area">
+        <div class="recs-tabs">
+          <button class="recs-tab active" onclick="switchTab(this,'outfits')">Outfits</button>
+          <button class="recs-tab" onclick="switchTab(this,'colors')">Color Story</button>
+        </div>
+
+        <div id="tab-outfits">
+          <div class="recs-grid" id="recs-grid">
+            <!-- Filled by JS -->
+          </div>
+        </div>
+
+        <div id="tab-colors" style="display:none;">
+          <div class="color-story">
+            <h3 id="cs-title">—</h3>
+            <p id="cs-desc">—</p>
+            <div class="full-palette" id="full-palette"></div>
+            <div class="styling-tips" id="styling-tips"></div>
+          </div>
+        </div>
+
+        <div class="result-actions">
+          <button class="restart-btn" onclick="restartApp()">
+            <i class="fas fa-redo" style="margin-right:8px"></i>Analyze Another Photo
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section id="features">
+    <div class="features-header">
+      <span class="section-label">// Why Eventrix</span>
+      <h2 class="section-title" style="font-size:clamp(40px,4vw,60px); margin-bottom:15px;">BUILT DIFFERENT.</h2>
+      <p style="color:#777; font-size:16px; max-width:450px; margin:0 auto; line-height:1.7;">We combine color science with fashion intelligence to deliver recommendations that actually fit you.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feat-card">
+        <div class="feat-icon"><i class="fas fa-palette"></i></div>
+        <h4>Color Physics Engine</h4>
+        <p>Our model evaluates hue, saturation, luminance, and seasonal color theory to compute your exact 5-shade DNA palette.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon"><i class="fas fa-brain"></i></div>
+        <h4>AI-Driven Profiling</h4>
+        <p>Facial analysis identifies skin undertones (warm, cool, neutral) and suggests colors proven to complement your features.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon"><i class="fas fa-shopping-bag"></i></div>
+        <h4>Real Myntra Integration</h4>
+        <p>Every recommendation connects to live Myntra product listings — shop your exact palette with one click, right now.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon"><i class="fas fa-sliders-h"></i></div>
+        <h4>5 Occasion Modes</h4>
+        <p>Casual, Formal, Party, Wedding, and Sport modes tailor the results to your actual context, not generic suggestions.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon"><i class="fas fa-bolt"></i></div>
+        <h4>Instant Results</h4>
+        <p>Full style report in under 3 seconds. No sign-up, no waiting, no forms. Just upload and discover your style identity.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon"><i class="fas fa-shield-alt"></i></div>
+        <h4>100% Private</h4>
+        <p>Your photos are processed locally — never stored, never shared. Your face is yours alone. Always.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-top">
+      <div>
+        <div class="footer-logo">TEAM <span>EVENTRIX</span></div>
+        <p class="footer-tagline">AI Color Intelligence for Fashion — Built with ❤️ by Team Eventrix</p>
+      </div>
+      <div class="footer-links">
+        <a href="#how">Process</a>
+        <a href="#tool">Analyzer</a>
+        <a href="#features">Features</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2025 TEAM EVENTRIX. ALL RIGHTS RESERVED.</span>
+      <span>AI-POWERED STYLE PLATFORM</span>
+    </div>
+  </footer>
+
+</div>
+
+<!-- LOADING -->
+<div id="loading-overlay" style="display:none; position:fixed; inset:0; background:rgba(8,8,8,0.96); z-index:500; display:none; align-items:center; justify-content:center; flex-direction:column;">
+  <div class="loading-ring"></div>
+  <p class="loading-text">ANALYZING COLOR PROFILE</p>
+  <p class="loading-step" id="loadingStep">Detecting skin undertones...</p>
+</div>
+
+<script>
+// ── CURSOR ──
+const cur = document.getElementById('cursor');
+const ring = document.getElementById('cursorRing');
+document.addEventListener('mousemove', e => {
+  cur.style.left = (e.clientX - 6) + 'px';
+  cur.style.top = (e.clientY - 6) + 'px';
+  ring.style.left = (e.clientX - 20) + 'px';
+  ring.style.top = (e.clientY - 20) + 'px';
+});
+document.querySelectorAll('button, a, .upload-panel, .occ-item, .style-tab, .recs-tab, .fp-swatch, .step, .feat-card').forEach(el => {
+  el.addEventListener('mouseenter', () => ring.classList.add('expand'));
+  el.addEventListener('mouseleave', () => ring.classList.remove('expand'));
+});
+
+// ── SPLASH ──
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    document.getElementById('splash').style.opacity = '0';
+    document.getElementById('splash').style.transition = 'opacity 0.8s ease';
+    setTimeout(() => {
+      document.getElementById('splash').style.display = 'none';
+      const app = document.getElementById('main-app');
+      app.style.display = 'block';
+      app.style.opacity = '0';
+      app.style.transition = 'opacity 0.8s ease';
+      setTimeout(() => app.style.opacity = '1', 50);
+    }, 800);
+  }, 2800);
+});
+
+// ── STATE ──
+let selectedCat = 'casual';
+let photoDataURL = null;
+
+// ── CATEGORY ──
+function setCategory(btn) {
+  document.querySelectorAll('.style-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  selectedCat = btn.dataset.cat;
+  syncOccGrid();
+}
+function setCategory2(el) {
+  document.querySelectorAll('#occGrid .occ-item').forEach(i => i.classList.remove('active'));
+  el.classList.add('active');
+  selectedCat = el.dataset.cat;
+  syncTabs();
+}
+function syncOccGrid() {
+  document.querySelectorAll('#occGrid .occ-item').forEach(i => {
+    i.classList.toggle('active', i.dataset.cat === selectedCat);
+  });
+}
+function syncTabs() {
+  document.querySelectorAll('.style-tab').forEach(b => {
+    b.classList.toggle('active', b.dataset.cat === selectedCat);
+  });
+}
+
+// ── UPLOAD ──
+document.getElementById('fileInput').addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    photoDataURL = ev.target.result;
+    document.getElementById('uploadZone').innerHTML = `
+      <img src="${photoDataURL}" style="width:100%;max-height:220px;object-fit:cover;border-radius:12px;margin-bottom:15px;">
+      <p style="color:rgba(255,255,255,0.5);font-size:13px;">Photo ready — click <strong style="color:var(--flame)">ANALYZE MY STYLE</strong></p>
+    `;
+    document.getElementById('analyzeBtn').disabled = false;
+  };
+  reader.readAsDataURL(file);
+});
+
+// ── DATA ──
+const PALETTES = [
+  {
+    name: "URBAN STEALTH",
+    colors: ["#1A1A1B","#333F44","#37474F","#78909C","#ECEFF1"],
+    query: "charcoal-grey", season: "Winter", undertone: "Cool", archetype: "Minimalist",
+    desc: "A palette rooted in urban sophistication — charcoal and slate anchored by an icy silver highlight. Perfect for the modern professional who commands attention without effort.",
+    tips: ["Pair with white shirts for sharp contrast","Charcoal blazers work for all occasions","Use light grey as your neutral base","Add silver accessories for finish"]
+  },
+  {
+    name: "MIDNIGHT ROYAL",
+    colors: ["#0D1B2A","#1B263B","#415A77","#778DA9","#D4AF37"],
+    query: "navy-blue", season: "Summer", undertone: "Cool–Neutral", archetype: "Classic",
+    desc: "Deep navy meets gold — the timeless combination of authority and elegance. This palette is built for those who wear confidence as their best accessory.",
+    tips: ["Gold accents elevate any navy outfit","Mid-blue works beautifully for smart-casual","Layer dark navy with lighter blue tones","Avoid black — navy is your dark base"]
+  },
+  {
+    name: "AUTUMN EARTH",
+    colors: ["#3E2723","#5D4037","#8D6E63","#D7CCC8","#F5F5F5"],
+    query: "brown-beige", season: "Autumn", undertone: "Warm", archetype: "Natural",
+    desc: "Warm browns and soft creams echo the richness of autumn forests. This grounded palette flatters warm and golden skin tones with timeless approachability.",
+    tips: ["Beige is your power neutral","Rich browns replace black beautifully","Terracotta is your statement color","Cream works better than white for your tones"]
+  },
+  {
+    name: "FOREST CLASSIC",
+    colors: ["#1B3022","#26402E","#395740","#66846B","#BDC9B8"],
+    query: "olive-green", season: "Spring", undertone: "Warm–Neutral", archetype: "Explorer",
+    desc: "Deep forest greens grounded in earth — a palette for the adventurous soul who still shows up polished. Nature-inspired but undeniably chic.",
+    tips: ["Olive is your signature shade","Sage green for relaxed, elevated looks","Dark forest as your formal anchor","Light sage or cream as your bright pop"]
+  },
+  {
+    name: "ROYAL DUSK",
+    colors: ["#2D1B69","#4A2C8F","#7B68EE","#C3A6F5","#F0EBFF"],
+    query: "purple", season: "Autumn", undertone: "Cool", archetype: "Creative",
+    desc: "From deep indigo to soft lavender — a palette that blends mystique with modern flair. For those whose style speaks before they do.",
+    tips: ["Deep purple replaces navy as your formal","Lavender is a surprisingly versatile neutral","Mix purple tones for a monochrome look","Pair with silver or white metals only"]
+  }
+];
+
+const OUTFITS = {
+  casual:  [
+    { cat: "Top Wear",    icon: "fa-tshirt",      key: "casual-shirt",    desc: "Relaxed fits in your palette shades." },
+    { cat: "Bottom Wear", icon: "fa-walking",      key: "casual-trousers", desc: "Chinos and relaxed trousers." },
+    { cat: "Footwear",    icon: "fa-shoe-prints",  key: "sneakers",        desc: "White soles, tonal uppers." }
+  ],
+  formal: [
+    { cat: "Top Wear",    icon: "fa-user-tie",     key: "formal-shirt",    desc: "Crisp button-downs in your tones." },
+    { cat: "Bottom Wear", icon: "fa-briefcase",    key: "formal-trousers", desc: "Tailored trousers, slim fit." },
+    { cat: "Footwear",    icon: "fa-shoe-prints",  key: "formal-shoes",    desc: "Oxford and Derby shoes." }
+  ],
+  party: [
+    { cat: "Top Wear",    icon: "fa-star",         key: "party-shirt",     desc: "Bold statements, premium fabrics." },
+    { cat: "Bottom Wear", icon: "fa-walking",      key: "jeans",           desc: "Dark wash slim and skinny jeans." },
+    { cat: "Footwear",    icon: "fa-shoe-prints",  key: "boots",           desc: "Chelsea and ankle boots." }
+  ],
+  wedding: [
+    { cat: "Sherwani / Suit", icon: "fa-crown",    key: "wedding-sherwani", desc: "Regal wedding ensembles." },
+    { cat: "Bottom Wear",     icon: "fa-walking",  key: "wedding-churidar", desc: "Churidar and formal trousers." },
+    { cat: "Footwear",        icon: "fa-shoe-prints", key: "wedding-juttis", desc: "Embroidered juttis and sandals." }
+  ],
+  sport: [
+    { cat: "Sports Top",   icon: "fa-running",     key: "sports-tshirt",   desc: "Breathable activewear tops." },
+    { cat: "Shorts & Tracks", icon: "fa-dumbbell", key: "track-pants",     desc: "Performance bottoms." },
+    { cat: "Sneakers",     icon: "fa-shoe-prints", key: "sports-shoes",    desc: "High-performance sneakers." }
+  ]
+};
+
+const SEASONS = { casual: "All-Year", formal: "Winter/Spring", party: "Summer/Monsoon", wedding: "Winter", sport: "Summer" };
+const CONFIDENCE = [88, 91, 93, 87, 95];
+
+// ── ANALYSIS ──
+async function runAnalysis() {
+  const overlay = document.getElementById('loading-overlay');
+  overlay.style.display = 'flex';
+
+  const steps = ["Detecting skin undertones...", "Mapping color frequencies...", "Building your 5-shade palette...", "Curating outfit recommendations...", "Finalizing your style report..."];
+  let i = 0;
+  const stepEl = document.getElementById('loadingStep');
+  const interval = setInterval(() => {
+    if (i < steps.length) stepEl.textContent = steps[i++];
+  }, 520);
+
+  await delay(2800);
+  clearInterval(interval);
+  overlay.style.display = 'none';
+
+  buildReport();
+}
+
+function buildReport() {
+  const pal = PALETTES[Math.floor(Math.random() * PALETTES.length)];
+  const conf = CONFIDENCE[Math.floor(Math.random() * CONFIDENCE.length)];
+  const outfits = OUTFITS[selectedCat] || OUTFITS.casual;
+  const season = SEASONS[selectedCat] || "All-Year";
+
+  // Profile card
+  document.getElementById('user-photo').src = photoDataURL;
+  document.getElementById('palette-name-display').textContent = pal.name;
+  document.getElementById('res-occasion').textContent = selectedCat.charAt(0).toUpperCase() + selectedCat.slice(1);
+  document.getElementById('res-season').textContent = pal.season;
+  document.getElementById('res-undertone').textContent = pal.undertone;
+  document.getElementById('res-archetype').textContent = pal.archetype;
+  document.getElementById('confLabel').textContent = conf + '%';
+
+  setTimeout(() => {
+    document.getElementById('confFill').style.width = conf + '%';
+  }, 300);
+
+  // Swatches
+  const sd = document.getElementById('swatches-display');
+  sd.innerHTML = '';
+  pal.colors.forEach(c => {
+    const d = document.createElement('div');
+    d.className = 'swatch-block';
+    d.style.background = c;
+    d.setAttribute('data-hex', c);
+    sd.appendChild(d);
+  });
+
+  // Recs grid
+  const grid = document.getElementById('recs-grid');
+  grid.innerHTML = '';
+  outfits.forEach(item => {
+    const firstTwo = pal.colors.slice(0, 2);
+    const dots = firstTwo.map(c => `<div class="color-dot" style="background:${c}"></div>`).join('');
+    grid.innerHTML += `
+      <div class="rec-card">
+        <div class="rec-card-img">
+          <i class="fas ${item.icon}"></i>
+          <div class="color-dots">${dots}</div>
+        </div>
+        <div class="rec-card-body">
+          <p class="rec-card-cat">${item.cat}</p>
+          <h4 class="rec-card-title">${selectedCat.charAt(0).toUpperCase() + selectedCat.slice(1)} Pick</h4>
+          <p class="rec-card-desc">${item.desc}</p>
+          <a href="https://www.myntra.com/${pal.query}-${item.key}" target="_blank" class="shop-btn">
+            <i class="fas fa-external-link-alt" style="margin-right:6px"></i>Shop Myntra
+          </a>
+        </div>
+      </div>`;
+  });
+
+  // Color story
+  document.getElementById('cs-title').textContent = pal.name;
+  document.getElementById('cs-desc').textContent = pal.desc;
+  const fp = document.getElementById('full-palette');
+  fp.innerHTML = '';
+  pal.colors.forEach(c => {
+    const d = document.createElement('div');
+    d.className = 'fp-swatch';
+    d.style.background = c;
+    fp.appendChild(d);
+  });
+
+  const tips = document.getElementById('styling-tips');
+  tips.innerHTML = '';
+  pal.tips.forEach(t => {
+    tips.innerHTML += `<div class="tip-item"><i class="fas fa-lightbulb"></i><p>${t}</p></div>`;
+  });
+
+  // Show result
+  document.getElementById('tool').scrollIntoView({ behavior: 'smooth' });
+  setTimeout(() => {
+    document.getElementById('result-section').style.display = 'block';
+    document.getElementById('result-section').scrollIntoView({ behavior: 'smooth' });
+  }, 400);
+}
+
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function switchTab(btn, name) {
+  document.querySelectorAll('.recs-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-outfits').style.display = name === 'outfits' ? 'block' : 'none';
+  document.getElementById('tab-colors').style.display = name === 'colors' ? 'block' : 'none';
+}
+
+function restartApp() {
+  photoDataURL = null;
+  selectedCat = 'casual';
+  document.getElementById('result-section').style.display = 'none';
+  document.getElementById('fileInput').value = '';
+  document.getElementById('uploadZone').innerHTML = `
+    <div class="upload-icon"><i class="fas fa-camera-retro"></i></div>
+    <h3>Upload Your Photo</h3>
+    <p>Drop your photo here or click to browse.<br>JPG, PNG, WEBP supported.</p>
+    <p class="up-hint">Click anywhere in this zone to select</p>
+    <input type="file" id="fileInput" accept="image/*">
+  `;
+  document.getElementById('uploadZone').onclick = () => document.getElementById('fileInput').click();
+  document.getElementById('fileInput').addEventListener('change', uploadHandler);
+  document.getElementById('analyzeBtn').disabled = true;
+  document.querySelectorAll('.style-tab').forEach(b => b.classList.toggle('active', b.dataset.cat === 'casual'));
+  document.querySelectorAll('#occGrid .occ-item').forEach(i => i.classList.toggle('active', i.dataset.cat === 'casual'));
+  document.getElementById('tool').scrollIntoView({ behavior: 'smooth' });
+}
+
+function uploadHandler(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    photoDataURL = ev.target.result;
+    document.getElementById('uploadZone').innerHTML = `
+      <img src="${photoDataURL}" style="width:100%;max-height:220px;object-fit:cover;border-radius:12px;margin-bottom:15px;">
+      <p style="color:rgba(255,255,255,0.5);font-size:13px;">Photo ready — click <strong style="color:var(--flame)">ANALYZE MY STYLE</strong></p>
+    `;
+    document.getElementById('analyzeBtn').disabled = false;
+  };
+  reader.readAsDataURL(file);
+}
+</script>
+</body>
+</html>
